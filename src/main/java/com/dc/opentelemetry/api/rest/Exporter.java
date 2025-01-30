@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.logzio.LogzioConfig;
-import io.micrometer.logzio.LogzioMeterRegistry;
 import jakarta.annotation.PostConstruct;
 
 @RestController
@@ -27,25 +25,14 @@ public class Exporter {
     private static final Logger logger = LoggerFactory.getLogger(Exporter.class);
     private static final String PHRASE = "This is an example log message but for the v2 version";
 
-    @Autowired
-    private LogzioConfig logzioConfig;
-
     private Counter counter;
 
     @PostConstruct
     public void init() {
-        LogzioMeterRegistry registry = new LogzioMeterRegistry(logzioConfig, Clock.SYSTEM);
-
         // Initialize the counter once the bean is created
         ArrayList<Tag> tags = new ArrayList<>();
         tags.add(Tag.of("env", "dev-micrometer"));
 
-        // Create and register the counter once
-        this.counter = Counter
-                .builder("koronet_counter")
-                .description("custom metric to test logz - v3")
-                .tags(tags)
-                .register(registry);
     }
 
     @GetMapping(path = "/log")
@@ -82,7 +69,6 @@ public class Exporter {
     @GetMapping(path = "/custom-metric")
     public ResponseEntity<String> generateCustomMetric() {
         // Increment your counter
-        counter.increment();
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 }
